@@ -24,6 +24,7 @@ class Api(ABC):
     def _check_status(response) -> bool:
         pass
 
+
 class HhApi(Api):
     def __init__(self) -> None:
         self.headers = {'User-Agent': 'HH-User-Agent'}
@@ -46,25 +47,26 @@ class HhApi(Api):
 
     @property
     def url(self) -> str:
-        HH_URL = "https://dev.hh.ru"
-        return HH_URL
+        hh_url = "https://api.hh.ru/vacancies"
+        return hh_url
 
     def _get_response(self) -> Response:
         return requests.get(self.url, headers=self.headers, params=self.__params)
 
-    def get_vacancies(self) -> list[dict]:
+    def get_vacancies(self):
         response = self._get_response()
         is_allowed = self._check_status(response)
-        if not is_allowed:
-            raise HhApiException(f"Ошибка запроса. Status code: {Response.status_code}")
-        try:
+        #if not is_allowed:
+            #raise HhApiException(f"Ошибка запроса. Status code: {Response.status_code}")
+        #try:
+        if is_allowed:
             while self.__params.get("page") != 20:
                 response = self._get_response()
                 vacancies = response.json()["items"]
                 self.__vacancies.extend(vacancies)
                 self.__params["page"] += 1
-        except JSONDecodeError:
-            raise HhApiException("Ошибка получения данных")
+        #except JSONDecodeError:
+            #raise HhApiException("Ошибка получения данных")
 
     @property
     def vacancies(self):
@@ -73,3 +75,4 @@ class HhApi(Api):
     @staticmethod
     def _check_status(response: Response) -> bool:
         return response.status_code == 200
+

@@ -1,10 +1,10 @@
 import psycopg2
+from db_manager import DbManager
 
 
-class DbCreator:
-    def __init__(self, db_name, params):
-        self.__db_name = db_name
-        self.__params = params
+class DbCreator(DbManager):
+    def __init__(self):
+        super().__init__()
 
     def create_database(self):
         conn = psycopg2.connect(db_name="postgres", **self.__params)
@@ -19,7 +19,7 @@ class DbCreator:
             with conn.cursor() as cursor:
                 cursor.execute("""
                 CREATE TABLE companies (
-                campany_ia INT PRIMARY KEY,
+                company_id INT PRIMARY KEY,
                 name VARCHAR(200) NOT NULL,
                 url VARCHAR(100)
                 )
@@ -47,8 +47,7 @@ class DbCreator:
                     cursor.execute("""
                     INSERT INTO companies (company_id, name, url)
                     VALUES (%s, %s, %s)
-                    """,
-                (company.company_id, company.company_name, company.url)
+                    """, (company.company_id, company.company_name, company.url)
                     )
                 for vacancy in vacancies:
                     cursor.execute("""
@@ -56,6 +55,6 @@ class DbCreator:
                     salary_from, salary_to, requirements)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """, (vacancy.vacancy_id, vacancy.company_id, vacancy.name, vacancy.city, vacancy.url,
-                    vacancy.salary_from, vacancy.salary_to, vacancy.requirements)
+                          vacancy.salary_from, vacancy.salary_to, vacancy.requirements)
                     )
         conn.close()
